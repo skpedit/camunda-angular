@@ -1,0 +1,57 @@
+https://camunda-form-playground.netlify.app/
+https://docs.camunda.io/docs/components/modeler/bpmn/script-tasks/
+
+
+{
+  "variables": {
+    "customerId": {
+      "value": "CUST12345",
+      "type": "String"
+    },
+    "orderAmount": {
+      "value": 250.75,
+      "type": "Double"
+    },
+    "isApproved": {
+      "value": false,
+      "type": "Boolean"
+    },
+    "dueDate": {
+      "value": "2024-12-20T12:00:00@Asia/Calcutta",
+      "type": "Date"
+    },
+    "orderDetails": {
+      "value": "{\"orderId\": \"ORD12345\", \"orderItems\": [{\"itemId\": \"ITEM001\", \"quantity\": 2}]}",
+      "type": "Object"
+    }
+  }
+}
+
+##### Using Expression  in your Exclusive Gateway #############################
+${now() > variables.dueDate.value}
+${now() <= variables.dueDate.value}
+
+date and time(variables.dueDate.value)
+
+
+### usig a Service Task
+--------------------------------------
+// Get the current date and the due date from process variables
+var currentDate = new Date();
+var dueDate = new Date(execution.getVariable("variables.dueDate.value"));
+var isOverdue = currentDate > dueDate;
+execution.setVariable("isOverdue", isOverdue);
+--------------------------------------
+
+
+==JIRA TASK========================
+1. BPMN.io
+https://github.com/bpmn-io/bpmn-js-example-angular?tab=readme-ov-file
+https://forum.bpmn.io/t/camunda-8-modeler-angular-9/9316/8
+
+- view a camunda modeller
+- deploy a modeler
+- call activity multiple modeler
+- List Task
+- View ONe Task
+- view a workflow/show a modler
