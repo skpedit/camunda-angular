@@ -1,0 +1,55 @@
+
+
+## https://github.com/TEJAPS/Camunda_SpringBoot
+
+	- https://docs.camunda.org/manual/7.3/api-references/rest/?__hstc=252030934.ae51b49b318a9b8d34c3ff6fc347b20f.1732950727612.1734408870466.1734422390957.19&__hssc=252030934.1.1734422390957&__hsfp=1669205919&_gl=1*lphssb*_gcl_au*MTE4ODAzNTgwOS4xNzMzMDEzNTU4LjIzNjI1ODcxMi4xNzMzOTg4MDU4LjE3MzM5ODgwNzA.*FPAU*MTE4ODAzNTgwOS4xNzMzMDEzNTU4*_ga*OTIwMjQ1Mzk2LjE3MzMwMTM1NjA.*_ga_4EYN8X5FNR*MTczNDQyMjM4Mi4yMS4wLjE3MzQ0MjIzOTguMC4wLjkxNDYwNDA1Ng..#task-get-single-task
+	- 
+	- 
+	- 
+	
+	
+## Task
+
+   GET https://your-camunda-instance.com/engine-rest/task/12345
+   GET https://your-camunda-instance.com/engine-rest/process-instance/67890/variables
+   
+   
+   GET http://localhost:8080/v1/tasks/2251799813685732
+   {
+   "formId": "Form_2",
+    "formVersion": 1,
+    "isFormEmbedded": false,
+   "formKey": "camunda-forms:bpmn:UserTaskForm_1ghhdv8",
+   "processDefinitionKey": "2251799813685726",
+   "processInstanceKey": "2251799813685727",
+   }
+	
+   GET http://localhost:8080/api/process-instances/2251799813685727
+   GET http://localhost:8080/api/process-instances/2251799813685727/statistics
+   GET http://localhost:8080/api/process-instances/2251799813685727/sequence-flows
+   POST http://localhost:8080/api/process-instances/2251799813685727/variables  --- payload: {"pageSize":50,"scopeId":"2251799813685727"}
+   GET http://localhost:8080/v1/forms/UserTaskForm_1ghhdv8?processDefinitionKey=2251799813685726
+   GET http://localhost:8080/api/processes/2251799813685726/xml
+   
+   
+   POST http://localhost:8080/v1/tasks/search
+   {"sort":[{"field":"creationTime","order":"ASC"}],"pageSize":50,"assigned":true,"assignee":"demo","state":"CREATED"}=
+   
+   POST: http://localhost:8080/api/process-instances
+	{"query":{"processIds":[],"active":true,"running":true,"incidents":true},"sorting":{"sortBy":"startDate","sortOrder":"desc"},"pageSize":50}
+   ============================================================
+   // Parse query parameters from the URL
+const urlParams = new URLSearchParams(window.location.search);
+const processInstanceId = urlParams.get('processInstanceId');
+const taskId = urlParams.get('taskId');
+
+console.log('Process Instance ID:', processInstanceId);
+console.log('Task ID:', taskId);
+
+// Use these values in your form logic
+document.getElementById('processInstanceField').value = processInstanceId;
+document.getElementById('taskField').value = taskId;
+
+window.addEventListener('message', function (event) {
+      console.log("kumar", event);
+});

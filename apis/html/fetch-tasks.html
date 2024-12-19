@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Camunda Task Fetcher</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        #taskList {
+            margin-top: 20px;
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        #taskList th,
+        #taskList td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+
+        #taskList th {
+            background-color: #f4f4f4;
+            text-align: left;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Camunda Task Fetcher</h1>
+    <button id="fetchTasksButton">Fetch Tasks</button>
+
+
+    <div id="results">
+        <h2>Task List</h2>
+        <table id="taskList">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Status</th>
+                    <th>Assignee</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Task rows will be dynamically inserted here -->
+            </tbody>
+        </table>
+    </div>
+
+    <br /><textarea id="processVariables" placeholder="Process Variables"></textarea>
+    <br /><textarea id="formSchema" placeholder="Form Schema"></textarea>
+
+    <script>
+        function setCookie() {
+            document.cookie = "G_ENABLED_IDPS=google; path=/; expires=Fri, 31 Dec 2024 23:59:59 GMT; SameSite=Lax";
+            document.cookie = "OPERATE-SESSION=CDB19E74DAEEBABDC7901F1B210FD229; path=/; expires=Fri, 31 Dec 2024 23:59:59 GMT; SameSite=Lax";
+        }
+
+
+
+        document.getElementById("fetchTasksButton").addEventListener("click", async () => {
+            setCookie();
+            const url = "http://localhost:8080/v1/tasks/search";
+
+            // Define the payload for the search query
+            // const payload = {
+            //     status: "open", // Example: Fetch only open tasks
+            //     assignee: "john.doe", // Optional: Specify the assignee
+            //     variables: { key: "priority", value: "high" } // Optional: Variable-based search
+            // };
+
+            const payload = { "sort": [{ "field": "creationTime", "order": "DESC" }], "pageSize": 50, "state": "CREATED" };
+
+            try {
+                // Make the POST request
+                const response = await fetch(url, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(payload),
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Error: ${response.status} ${response.statusText}`);
+                }
+
+                // Parse the response
+                const tasks = await response.json();
+
+                // Update the UI
+                const taskListBody = document.querySelector("#taskList tbody");
+                taskListBody.innerHTML = ""; // Clear any existing rows
+
+                tasks.forEach(task => {
+                    const row = document.createElement("tr");
+                    row.innerHTML = `
+                        <td onClick="fetchVariable('${task.processInstanceKey}', '${task.processDefinitionKey}', '${task.formKey}')">${task.id}</td>
+                        <td>${task.name}</td>
+                        <td>${task.status}</td>
+                        <td>${task.assignee || "Unassigned"}</td>
+                    `;
+                    taskListBody.appendChild(row);
+                });
+            } catch (error) {
+                console.error("Failed to fetch tasks:", error);
+                alert("Error fetching tasks. Check the console for details.");
+            }
+        });
+
+        async function fetchVariable(processInstanceKey, processDefinitionKey, formKey) {
+
+            setCookie();
+
+            const url = `http://localhost:8080/api/process-instances/${processInstanceKey}/variables`;
+            const payload = { "pageSize": 50, "scopeId": processInstanceKey };
+
+            // Make the POST request
+            const response = await fetch(url, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(payload),
+            });
+
+            if (!response.ok) {
+                throw new Error(`Error: ${response.status} ${response.statusText}`);
+            }
+
+            // Parse the response
+            const processVariables = await response.json();
+            document.getElementById("processVariables").value = JSON.stringify(processVariables);
+            console.log(processVariables);
+
+            fetchFormSchema(processDefinitionKey, formKey);
+        }
+
+
+
+        async function fetchFormSchema(processDefinitionKey, formKey) {
+            setCookie();
+            const formID = formKey.replace('camunda-forms:bpmn:', '');
+            const url = `http://localhost:8080/v1/forms/${formID}?processDefinitionKey=${processDefinitionKey}`;
+
+            // Make the POST request
+            const response = await fetch(url);
+
+            if (!response.ok) {
+                throw new Error(`Error: ${response.status} ${response.statusText}`);
+            }
+
+            // Parse the response
+            const formSchema = await response.json();
+            document.getElementById("formSchema").value = JSON.stringify(formSchema);
+        }
+    </script>
+</body>
+
+</html>
